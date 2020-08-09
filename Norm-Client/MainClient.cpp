@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <iostream>
 #include <string>
+#include <vector>
 #include "Client.h"
 #pragma warning(disable: 4996)
 
@@ -9,14 +10,13 @@
 Client client;
 
 void ClientHandler() {
-	int msg_size;
+	char msg[256];
 	while (true) {
-		recv(client.Connection, (char*)&msg_size, sizeof(int), NULL);
-		char* msg = new char[msg_size + 1];
-		msg[msg_size] = '\0';
-		recv(client.Connection, msg, msg_size, NULL);
-		cout << msg << endl;
-		delete[] msg;
+		if (recv(client.Connection, msg, 256, NULL) > 0) {
+			cout << msg << endl;
+			Sleep(10);
+			cout << "2\n";
+		}
 	}
 }
 
@@ -25,13 +25,12 @@ int main(int argc, char* argv[]) {
 
 	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)ClientHandler, NULL, NULL, NULL);
 
-	string msg1;
+	char msg1[256];
 	while (true) {
-		getline(cin, msg1);
-		int msg_size = msg1.size();
-		send(client.Connection, (char*)&msg_size, sizeof(int), NULL);
-		send(client.Connection, msg1.c_str(), msg_size, NULL);
+		cin.getline(msg1, sizeof(msg1));
+		send(client.Connection, msg1, sizeof(msg1), NULL);
 		Sleep(10);
+		cout << "1\n";
 	}
 
 	system("pause");
